@@ -4,16 +4,27 @@ export interface ExperienceProps {
   items: ExperienceItem[];
 }
 
+function formatMonth(iso: string): string {
+  const [y, m] = iso.split("-").map(Number);
+  if (!y || !m) return iso;
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 function formatRange(item: ExperienceItem): string {
-  const end = item.is_current ? "Present" : (item.end_date ?? "Present");
-  return `${item.start_date} – ${end}`;
+  const end =
+    item.is_current || !item.end_date ? "Present" : formatMonth(item.end_date);
+  return `${formatMonth(item.start_date)} – ${end}`;
 }
 
 export default function Experience({ items }: ExperienceProps) {
   if (items.length === 0) return null;
 
   return (
-    <article
+    <section
       id="experience"
       data-reveal
       aria-labelledby="experience-heading"
@@ -47,12 +58,12 @@ export default function Experience({ items }: ExperienceProps) {
             >
               {/* Date column */}
               <div className="font-mono text-xs leading-relaxed text-[var(--faint)] sm:pt-1.5">
-                <time dateTime={item.start_date}>{item.start_date}</time>
+                <time dateTime={item.start_date}>{formatMonth(item.start_date)}</time>
                 {" — "}
                 {item.is_current ? (
                   <span>Present</span>
                 ) : item.end_date ? (
-                  <time dateTime={item.end_date}>{item.end_date}</time>
+                  <time dateTime={item.end_date}>{formatMonth(item.end_date)}</time>
                 ) : (
                   <span>Present</span>
                 )}
@@ -86,6 +97,6 @@ export default function Experience({ items }: ExperienceProps) {
           </li>
         ))}
       </ol>
-    </article>
+    </section>
   );
 }

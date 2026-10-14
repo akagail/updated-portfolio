@@ -36,7 +36,7 @@ export default function Hero({ profile, socials }: HeroProps) {
         paddingBottom: "clamp(5rem, 10vh, 8rem)",
       }}
     >
-      <div className="mx-auto max-w-[64rem]">
+      <div className="max-w-[64rem]">
         {location ? (
           <p
             data-reveal

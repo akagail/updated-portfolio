@@ -77,7 +77,6 @@ export async function initPageAnimations(): Promise<() => void> {
       .filter(
         (el) =>
           !el.closest("[data-hero]") &&
-          !el.closest(".projects-carousel") &&
           !el.closest(".showcase"),
       );
     if (scrollItems.length > 0) {

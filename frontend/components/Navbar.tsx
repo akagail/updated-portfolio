@@ -22,7 +22,6 @@ const DEFAULT_LINKS: NavbarLink[] = [
   { href: "#skills", label: "Skills" },
   { href: "#work", label: "Work" },
   { href: "#experience", label: "Experience" },
-  { href: "#education", label: "Education" },
 ];
 
 export default function Navbar({

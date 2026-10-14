@@ -9,7 +9,7 @@ const SITE_URL = (
 
 const FALLBACK_TITLE = "Portfolio — Projects, Skills, and Experience";
 const FALLBACK_DESCRIPTION =
-  "Personal portfolio showcasing selected projects, skills, experience, education, and contact details.";
+  "Personal portfolio showcasing selected projects, skills, experience, and contact details.";
 
 function toOneLine(value: string): string {
   return value.replace(/\s+/g, " ").trim();
@@ -98,8 +98,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafaf7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c0d0c" },
+    { media: "(prefers-color-scheme: light)", color: "#f8f8f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0d0c" },
   ],
 };
 
@@ -109,6 +109,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
+        {/* Follow the OS theme: .dark tokens apply when the system prefers dark. No-JS defaults to light. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var m=matchMedia('(prefers-color-scheme: dark)');var f=function(){document.documentElement.classList.toggle('dark',m.matches)};f();m.addEventListener('change',f)}catch(e){}",
+          }}
+        />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>

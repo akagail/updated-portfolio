@@ -165,7 +165,6 @@ export default function Showcase({ projects }: ShowcaseProps) {
     <section
       ref={sectionRef}
       id="work"
-      aria-label="Selected work"
       aria-labelledby="work-heading"
       data-reveal
       className="showcase"

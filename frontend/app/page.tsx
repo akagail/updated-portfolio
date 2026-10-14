@@ -2,7 +2,6 @@ import { Suspense } from "react";
 
 import About from "../components/About";
 import Contact from "../components/Contact";
-import Education from "../components/Education";
 import Experience from "../components/Experience";
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
@@ -11,7 +10,6 @@ import Showcase from "../components/Showcase";
 import Skills from "../components/Skills";
 import { EmptyState, ErrorState, LoadingState } from "../components/States";
 import {
-  getEducation,
   getExperience,
   getGroupedSkills,
   getProfile,
@@ -19,7 +17,6 @@ import {
   getSocialLinks,
 } from "../lib/api";
 import type {
-  Education as EducationItem,
   Experience as ExperienceItem,
   GroupedSkillCategory,
   Profile,
@@ -52,14 +49,12 @@ export default async function HomePage() {
     skillsResult,
     projectsResult,
     experienceResult,
-    educationResult,
   ] = await Promise.all([
     settle<Profile | null>(() => getProfile()),
     settle<SocialLink[]>(() => getSocialLinks()),
     settle<GroupedSkillCategory[]>(() => getGroupedSkills()),
     settle<Project[]>(() => getProjects()),
     settle<ExperienceItem[]>(() => getExperience()),
-    settle<EducationItem[]>(() => getEducation()),
   ]);
 
   const profile = profileResult.data;
@@ -72,11 +67,26 @@ export default async function HomePage() {
   const projectsError = projectsResult.error;
   const experience = experienceResult.data ?? [];
   const experienceError = experienceResult.error;
-  const education = educationResult.data ?? [];
-  const educationError = educationResult.error;
 
   const brand = profile?.name ?? "Portfolio";
   const year = new Date().getFullYear();
+
+  const earliestStart = experience.map((e) => e.start_date).sort()[0];
+  const yearsOfExperience = earliestStart
+    ? Math.max(1, year - new Date(earliestStart).getFullYear())
+    : 0;
+  const skillCount = skills.flatMap((c) => c.skills).length;
+  const aboutStats = [
+    projects.length > 0 && {
+      label: "Projects",
+      value: String(projects.length),
+    },
+    yearsOfExperience > 0 && {
+      label: "Years of experience",
+      value: String(yearsOfExperience),
+    },
+    skillCount > 0 && { label: "Technologies", value: String(skillCount) },
+  ].filter((s): s is { label: string; value: string } => Boolean(s));
 
   return (
     <>
@@ -108,7 +118,7 @@ export default async function HomePage() {
             </section>
           ) : (
             <Suspense fallback={<LoadingState label="Loading about…" />}>
-              <About profile={profile} />
+              <About profile={profile} stats={aboutStats} />
             </Suspense>
           )}
 
@@ -155,19 +165,6 @@ export default async function HomePage() {
               />
             ) : (
               <Experience items={experience} />
-            )}
-          </Suspense>
-
-          <Suspense fallback={<LoadingState label="Loading education…" />}>
-            {educationError ? (
-              <ErrorState message="Education is currently unavailable." />
-            ) : education.length === 0 ? (
-              <EmptyState
-                title="No education yet"
-                message="Education entries will appear here once published."
-              />
-            ) : (
-              <Education items={education} />
             )}
           </Suspense>
 
