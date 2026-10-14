@@ -1,3 +1,7 @@
+"use client";
+
+import { useRef } from "react";
+
 import type { Profile, SocialLink } from "../lib/types";
 
 interface HeroProps {
@@ -5,157 +9,150 @@ interface HeroProps {
   socials: SocialLink[];
 }
 
+/**
+ * Sky-first hero: editorial headline, real CMS copy only,
+ * one floating glass detail + pointer-responsive light (CSS vars, no lib).
+ */
 export default function Hero({ profile, socials }: HeroProps) {
+  const ref = useRef<HTMLElement | null>(null);
+
+  const onMove = (e: React.MouseEvent) => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+      return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--px", `${((e.clientX - r.left) / r.width) * 100}%`);
+    el.style.setProperty("--py", `${((e.clientY - r.top) / r.height) * 100}%`);
+  };
+
   if (!profile) {
     return (
       <header
         data-hero
         aria-label="Introduction"
-        className="container-x overflow-x-clip"
-        style={{
-          paddingTop: "clamp(8rem, 16vh, 11rem)",
-          paddingBottom: "clamp(4rem, 9vh, 7rem)",
-        }}
+        className="container-x"
+        style={{ paddingTop: "clamp(8rem, 16vh, 11rem)", paddingBottom: "4rem" }}
       >
         <p role="status" data-reveal className="text-[var(--muted)]">
-          Profile is currently unavailable.
+          Profile unavailable — publish a profile in Django admin.
         </p>
       </header>
     );
   }
 
   const { name, title, intro, email, location, resume } = profile;
+  const words = name.split(/\s+/).filter(Boolean);
+  const first = words.slice(0, -1).join(" ");
+  const last = words.slice(-1).join(" ");
 
   return (
     <header
       data-hero
+      ref={ref}
+      onMouseMove={onMove}
       aria-labelledby="hero-heading"
-      className="container-x overflow-x-clip"
+      className="hero-sky"
       style={{
-        paddingTop: "clamp(8rem, 16vh, 11rem)",
-        paddingBottom: "clamp(5rem, 10vh, 8rem)",
+        paddingTop: "clamp(8.5rem, 17vh, 12rem)",
+        paddingBottom: "clamp(4rem, 9vh, 6.5rem)",
       }}
     >
-      <div className="max-w-[64rem]">
-        {location ? (
-          <p
-            data-reveal
-            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-[var(--muted)]"
-          >
-            <span className="status-dot" aria-hidden="true" />
-            {location}
-          </p>
-        ) : null}
+      {/* Sunlight follows pointer — CSS vars, decorative only */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(34rem 22rem at var(--px, 72%) var(--py, 18%), rgba(255,255,255,0.85), transparent 65%)",
+        }}
+      />
+      <span aria-hidden="true" className="hero-bubble" style={{ width: 120, height: 120, left: "6%", top: "22%" }} />
+      <span aria-hidden="true" className="hero-bubble float-soft" style={{ width: 64, height: 64, left: "12%", top: "58%" }} />
+      <span aria-hidden="true" className="hero-bubble" style={{ width: 180, height: 180, right: "4%", top: "12%", opacity: 0.8 }} />
+      <span aria-hidden="true" className="hero-bubble float-soft" style={{ width: 44, height: 44, right: "18%", bottom: "18%", animationDelay: "-3s" }} />
 
-        <h1
-          data-reveal
-          id="hero-heading"
-          className="mt-7 min-w-0 max-w-[16ch] break-words"
-        >
-          {name}
+      <div className="container-x relative">
+        <p data-reveal className="eyebrow">
+          {location ? `${location} — ` : ""}Portfolio {new Date().getFullYear()}
+        </p>
+
+        <h1 data-reveal id="hero-heading" className="mt-6 max-w-[16ch]">
+          {first ? <span className="hero-gloss block">{first}</span> : null}
+          <span className="hero-gloss-accent block">{last || name}</span>
         </h1>
 
         {title ? (
-          <p
-            data-reveal
-            className="mt-6 max-w-[38rem] text-lg font-medium tracking-[-0.01em] text-[var(--ink-soft)] sm:text-xl"
-          >
+          <p data-reveal className="mt-5 font-display text-[clamp(1.1rem,2vw,1.4rem)] font-semibold text-[var(--ink-soft)]">
             {title}
           </p>
         ) : null}
 
-        {intro ? (
-          <p data-reveal className="lede mt-6 max-w-[46rem] break-words">
-            {intro}
-          </p>
-        ) : null}
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-12 lg:items-end">
+          <div className="min-w-0">
+            {intro ? (
+              <p data-reveal className="lede max-w-[48ch]">
+                {intro}
+              </p>
+            ) : null}
+            <div data-reveal className="mt-8 flex flex-wrap items-center gap-3">
+              <a href="#work" className="btn btn-accent">
+                Explore the work
+                <span aria-hidden="true">→</span>
+              </a>
+              {email ? (
+                <a href={`mailto:${email}`} className="btn btn-outline">
+                  Get in touch
+                </a>
+              ) : resume ? (
+                <a href={resume} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                  Resume
+                </a>
+              ) : null}
+            </div>
+          </div>
 
-        <div
-          data-reveal
-          className="mt-10 flex flex-wrap items-center gap-x-4 gap-y-3"
-        >
-          <a href="#work" className="btn btn-dark">
-            Explore my work
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M8 2v11M3.5 9 8 13.5 12.5 9" />
-            </svg>
-          </a>
-          {resume ? (
-            <a
-              href={resume}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-[var(--ink)] underline decoration-[var(--border-strong)] underline-offset-4 transition-colors hover:decoration-[var(--accent)]"
-            >
-              View résumé
-            </a>
-          ) : email ? (
-            <a
-              href={`mailto:${email}`}
-              className="inline-flex min-h-[44px] items-center text-sm font-semibold text-[var(--ink)] underline decoration-[var(--border-strong)] underline-offset-4 transition-colors hover:decoration-[var(--accent)]"
-            >
-              Get in touch
-            </a>
-          ) : null}
+          {/* Single floating glass detail — availability + socials */}
+          <div data-reveal className="min-w-0">
+            <div className="glass float-soft max-w-sm rounded-[var(--radius-lg)] p-5 lg:ml-auto">
+              <p className="flex items-center gap-2 font-mono text-[0.72rem] uppercase tracking-[0.12em] text-[var(--muted)]">
+                <span className="status-dot" />
+                Open for new work
+              </p>
+              {resume ? (
+                <a
+                  href={resume}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex min-h-[44px] items-center font-display text-[0.95rem] font-bold text-[var(--ink)]"
+                >
+                  View resume <span aria-hidden="true" className="ml-1">↗</span>
+                </a>
+              ) : null}
+              {socials.length > 0 ? (
+                <ul aria-label={`Social links for ${name}`} className="mt-2 flex list-none flex-wrap gap-x-4 gap-y-1 p-0">
+                  {socials.map((link) => (
+                    <li key={link.id}>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${link.platform} profile`}
+                        className="inline-flex min-h-[44px] items-center text-[0.85rem] font-semibold text-[var(--ink-soft)] no-underline hover:text-[var(--accent)]"
+                      >
+                        {link.platform}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </div>
         </div>
 
-        {socials.length > 0 ? (
-          <div
-            data-reveal
-            className="mt-14 flex flex-wrap items-center gap-x-10 gap-y-6 border-t border-[var(--border)] pt-8"
-          >
-            <ul
-              aria-label={`Social links for ${name}`}
-              className="flex list-none flex-wrap items-center gap-x-7 gap-y-3 p-0"
-            >
-              {socials.map((link) => (
-                <li key={link.id}>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${link.platform} profile`}
-                    className="group inline-flex min-h-[44px] min-w-[44px] items-center text-sm font-medium text-[var(--ink-soft)] no-underline transition-colors hover:text-[var(--ink)]"
-                  >
-                    {link.platform}
-                    <svg
-                      aria-hidden="true"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="ml-1.5 translate-y-[-2px] text-[var(--faint)] transition-colors group-hover:text-[var(--muted)]"
-                    >
-                      <path d="M3.5 10.5l7-7M4.5 3.5h6v6" />
-                    </svg>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        <p
-          data-reveal
-          aria-hidden="true"
-          className="mt-16 font-mono text-xs uppercase tracking-[0.2em] text-[var(--faint)]"
-        >
-          Scroll to explore
-          <span className="scroll-hint" />
+        <p data-reveal aria-hidden="true" className="tech-label mt-12">
+          Scroll — projects drift sideways below
         </p>
       </div>
     </header>

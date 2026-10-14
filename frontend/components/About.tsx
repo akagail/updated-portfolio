@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import type { Profile } from "../lib/types";
+import { SectionIndex } from "./tech";
 
 export interface AboutStat {
   label: string;
@@ -9,12 +10,8 @@ export interface AboutStat {
 
 export interface AboutProps {
   profile: Profile;
-  /** Optional numbers derived from real data (project count, years, etc.). */
   stats?: AboutStat[];
 }
-
-// Relationship status and similar personal details don't belong on a portfolio.
-const PERSONAL_STATUS = /^(single|married|divorced|widowed)\b/i;
 
 function getInitials(name: string): string {
   return name
@@ -25,30 +22,10 @@ function getInitials(name: string): string {
     .join("");
 }
 
-/**
- * Profile bento — a flat 12-column grid:
- *
- *   ┌───────────── bio ─────────────┐ ┌──── portrait ────┐
- *   └───────────────────────────────┘ │                  │
- *   ┌─ location ─┐ ┌── status ──┐      │                  │
- *   └────────────┘ └────────────┘      └──────────────────┘
- *   ┌──────────── education ────────────┐ ┌─ at a glance ─┐
- *   └───────────────────────────────────┘ └───────────────┘
- *
- * Cards that have no data are skipped and neighbours widen to fill the row,
- * so a thin profile never leaves holes in the grid.
- */
+/** Editorial profile: oversized lead, open whitespace, one portrait moment. */
 export default function About({ profile, stats = [] }: AboutProps) {
-  const {
-    name,
-    title,
-    bio,
-    education_summary,
-    status,
-    location,
-    avatar,
-    resume,
-  } = profile;
+  const { name, title, bio, education_summary, location, avatar, resume } =
+    profile;
 
   const paragraphs = bio
     .split(/\n{2,}/)
@@ -58,25 +35,9 @@ export default function About({ profile, stats = [] }: AboutProps) {
     ? paragraphs
     : [
         name
-          ? `${name} builds thoughtful digital products.`
-          : "Thoughtful digital products, built with care.",
+          ? `${name} builds practical software for real-world problems.`
+          : "Practical software for real-world problems.",
       ];
-
-  const showStatus = Boolean(status) && !PERSONAL_STATUS.test(status.trim());
-  const facts = [
-    location ? { label: "Location", value: location, dot: false } : null,
-    showStatus ? { label: "Status", value: status, dot: true } : null,
-  ].filter(
-    (f): f is { label: string; value: string; dot: boolean } => f !== null,
-  );
-
-  const factSpans =
-    facts.length === 2 ? ["about-s4", "about-s3"] : ["about-s7"];
-  const hasFacts = facts.length > 0;
-  const hasEducation = Boolean(education_summary);
-  const hasStats = stats.length > 0;
-  const educationSpan = hasStats ? "about-s8" : "about-s12";
-  const statsSpan = hasEducation ? "about-s4" : "about-s12";
 
   return (
     <section
@@ -85,118 +46,100 @@ export default function About({ profile, stats = [] }: AboutProps) {
       aria-labelledby="about-heading"
       className="editorial-block"
     >
-      <div className="about-grid">
-        {/* Bio */}
-        <div className="about-card about-s7 about-wide">
-          <h2 id="about-heading" className="max-w-[20ch] text-balance">
-            About me
+      <SectionIndex num="01" name="About" side="Hello" />
+
+      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-16">
+        <div className="min-w-0">
+          <h2 id="about-heading" className="about-lead max-w-[26ch] text-balance">
+            {lead}
           </h2>
-          <p className="lede mt-5 max-w-[56ch] break-words">{lead}</p>
-          {rest.map((paragraph) => (
+          {rest.slice(0, 3).map((paragraph) => (
             <p
-              key={paragraph}
-              className="mt-4 max-w-[56ch] break-words text-[1rem] leading-relaxed text-[var(--ink-soft)]"
+              key={paragraph.slice(0, 48)}
+              className="mt-5 max-w-[62ch] break-words text-[1rem] leading-relaxed text-[var(--ink-soft)]"
             >
               {paragraph}
             </p>
           ))}
-          <div className="about-actions">
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
             {resume ? (
-              <>
-                <a
-                  href={resume}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-dark"
-                >
-                  Download résumé
-                </a>
-                <a href="#contact" className="about-link">
-                  Contact me
-                </a>
-              </>
-            ) : (
-              <a href="#contact" className="btn btn-dark">
-                Contact me
+              <a
+                href={resume}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline"
+              >
+                Resume
               </a>
-            )}
-          </div>
-        </div>
-
-        {/* Portrait */}
-        <figure
-          className={`about-card about-portrait about-s5 about-wide${
-            hasFacts ? " about-rows-2" : ""
-          }`}
-        >
-          <div className="about-portrait__media">
-            {avatar ? (
-              <Image
-                src={avatar}
-                alt={`Portrait of ${name}`}
-                fill
-                sizes="(max-width: 1023px) 100vw, 480px"
-                className="object-cover"
-              />
-            ) : (
-              <span className="about-portrait__initials" aria-hidden="true">
-                {getInitials(name) || "?"}
-              </span>
-            )}
-          </div>
-          <figcaption className="about-portrait__caption">
-            <p className="font-semibold text-[var(--ink)]">{name}</p>
-            {title ? (
-              <p className="mt-0.5 text-sm text-[var(--muted)]">{title}</p>
             ) : null}
-          </figcaption>
-        </figure>
-
-        {/* Quick facts */}
-        {facts.map((fact, i) => (
-          <div
-            key={fact.label}
-            className={`about-card ${factSpans[i]}${
-              facts.length === 1 ? " about-wide" : ""
-            }`}
-          >
-            <h3 className="about-label">{fact.label}</h3>
-            <p className="about-value">
-              {fact.dot ? (
-                <span
-                  className="status-dot mr-2.5 align-middle"
-                  aria-hidden="true"
-                />
-              ) : null}
-              {fact.value}
-            </p>
+            <a
+              href="#contact"
+              className="inline-flex min-h-[44px] items-center font-display text-[0.95rem] font-bold text-[var(--accent)]"
+            >
+              Say hello <span aria-hidden="true" className="ml-1">→</span>
+            </a>
           </div>
-        ))}
 
-        {/* Education */}
-        {hasEducation ? (
-          <div className={`about-card ${educationSpan} about-wide`}>
-            <h3 className="about-label">Education</h3>
-            <p className="about-value max-w-[52ch] break-words !font-medium">
-              {education_summary}
-            </p>
-          </div>
-        ) : null}
-
-        {/* At a glance — derived from real data, never invented */}
-        {hasStats ? (
-          <div className={`about-card about-card--tint ${statsSpan} about-wide`}>
-            <h3 className="about-label">At a glance</h3>
-            <dl className="about-stats">
+          {stats.length > 0 ? (
+            <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-6">
               {stats.map((stat) => (
-                <div key={stat.label} className="about-stat">
-                  <dt>{stat.label}</dt>
-                  <dd>{stat.value}</dd>
+                <div key={stat.label} className="min-w-0">
+                  <dd className="m-0 font-display text-[clamp(2rem,3.4vw,2.8rem)] font-extrabold leading-none tracking-tight text-[var(--ink)]">
+                    {stat.value}
+                  </dd>
+                  <dt className="tech-label mt-2">{stat.label}</dt>
                 </div>
               ))}
             </dl>
+          ) : null}
+        </div>
+
+        <aside className="min-w-0" aria-label="At a glance">
+          <div className="about-portrait">
+            {avatar ? (
+              <span className="relative block aspect-[4/5] overflow-hidden">
+                <Image
+                  src={avatar}
+                  alt={`Portrait of ${name}`}
+                  fill
+                  sizes="(max-width: 1023px) 100vw, 360px"
+                  className="object-cover"
+                />
+              </span>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="grid aspect-[4/5] place-items-center font-display text-[clamp(3rem,8vw,5rem)] font-extrabold text-white/90"
+                style={{
+                  background:
+                    "linear-gradient(150deg, #8fd8ff, #43cfc5 55%, #c7f5d9)",
+                }}
+              >
+                {getInitials(name) || "○"}
+              </span>
+            )}
           </div>
-        ) : null}
+          <dl className="mt-5 space-y-2 text-[0.9rem]">
+            {title ? (
+              <div className="flex gap-3">
+                <dt className="tech-label w-20 shrink-0 pt-1">Role</dt>
+                <dd className="m-0 text-[var(--ink)]">{title}</dd>
+              </div>
+            ) : null}
+            {location ? (
+              <div className="flex gap-3">
+                <dt className="tech-label w-20 shrink-0 pt-1">Based</dt>
+                <dd className="m-0 text-[var(--ink-soft)]">{location}</dd>
+              </div>
+            ) : null}
+            {education_summary ? (
+              <div className="flex gap-3">
+                <dt className="tech-label w-20 shrink-0 pt-1">Studied</dt>
+                <dd className="m-0 text-[var(--ink-soft)]">{education_summary}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </aside>
       </div>
     </section>
   );

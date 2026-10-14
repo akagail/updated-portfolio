@@ -1,4 +1,5 @@
 import type { Experience as ExperienceItem } from "../lib/types";
+import { SectionIndex } from "./tech";
 
 export interface ExperienceProps {
   items: ExperienceItem[];
@@ -14,12 +15,7 @@ function formatMonth(iso: string): string {
   });
 }
 
-function formatRange(item: ExperienceItem): string {
-  const end =
-    item.is_current || !item.end_date ? "Present" : formatMonth(item.end_date);
-  return `${formatMonth(item.start_date)} – ${end}`;
-}
-
+/** Flowing sequence: water-drop markers, date / role / story hierarchy. */
 export default function Experience({ items }: ExperienceProps) {
   if (items.length === 0) return null;
 
@@ -30,73 +26,65 @@ export default function Experience({ items }: ExperienceProps) {
       aria-labelledby="experience-heading"
       className="editorial-block"
     >
-      <div className="flex items-center justify-between gap-4">
-        <p className="eyebrow" aria-hidden="true">
-          Experience
-        </p>
-        <span className="font-mono text-xs text-[var(--faint)]">
-          {String(items.length).padStart(2, "0")}
-        </span>
-      </div>
-      <h2
-        id="experience-heading"
-        className="mt-4 max-w-[18ch] break-words text-balance"
-      >
-        A record of previous roles.
-      </h2>
+      <SectionIndex
+        num="04"
+        name="Experience"
+        side={`${String(items.length).padStart(2, "0")} roles`}
+      />
+      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-14">
+        <div className="min-w-0">
+          <h2 id="experience-heading" className="max-w-[14ch] text-balance">
+            Where I&apos;ve been.
+          </h2>
+          <p className="mt-4 max-w-[36ch] text-[0.95rem] leading-relaxed text-[var(--muted)]">
+            Real roles, real dates — exactly as listed, newest first.
+          </p>
+        </div>
 
-      <ol className="mt-8 list-none p-0">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            data-reveal
-            className="relative border-t border-[var(--border)] py-6 transition-colors"
-          >
-            <article
-              aria-labelledby={`experience-position-${item.id}`}
-              className="grid min-w-0 gap-2 sm:grid-cols-[9rem_1fr] sm:gap-6"
+        <ol className="min-w-0 list-none p-0">
+          {items.map((item) => (
+            <li
+              key={item.id}
+              data-reveal
+              className="relative grid gap-1 py-7 pl-10 first:pt-0 sm:grid-cols-[9rem_1fr] sm:gap-6"
+              style={{ borderBottom: "1px solid var(--border)" }}
             >
-              {/* Date column */}
-              <div className="font-mono text-xs leading-relaxed text-[var(--faint)] sm:pt-1.5">
+              <span aria-hidden="true" className="timeline-rail" />
+              <span aria-hidden="true" className="timeline-drop" />
+              <div className="font-mono text-[0.72rem] uppercase leading-relaxed tracking-[0.1em] text-[var(--muted)] sm:pt-1.5">
                 <time dateTime={item.start_date}>{formatMonth(item.start_date)}</time>
                 {" — "}
                 {item.is_current ? (
-                  <span>Present</span>
+                  <span style={{ color: "var(--accent)", fontWeight: 700 }}>Now</span>
                 ) : item.end_date ? (
                   <time dateTime={item.end_date}>{formatMonth(item.end_date)}</time>
                 ) : (
-                  <span>Present</span>
+                  <span>Now</span>
                 )}
-                <span className="sr-only"> ({formatRange(item)})</span>
               </div>
-
-              {/* Content column */}
               <div className="min-w-0">
-                <h3
-                  id={`experience-position-${item.id}`}
-                  className="break-words text-[1.0625rem] font-semibold text-[var(--ink)]"
-                >
+                <h3 className="break-words text-[1.15rem] font-bold tracking-tight text-[var(--ink)]">
                   {item.position}
                 </h3>
-                <p className="mt-1 text-sm font-medium text-[var(--muted)]">
+                <p className="mt-0.5 font-display text-[0.95rem] font-semibold text-[var(--ink-soft)]">
                   {item.company}
+                  {item.is_current ? (
+                    <span className="glass ml-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 align-middle font-mono text-[0.65rem] uppercase tracking-[0.1em] text-[var(--accent)]">
+                      <span className="status-dot" style={{ width: 6, height: 6 }} />
+                      Current
+                    </span>
+                  ) : null}
                 </p>
-                {item.is_current ? (
-                  <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-2 py-0.5 text-xs font-medium text-[var(--muted)]">
-                    <span className="status-dot !h-1.5 !w-1.5" />
-                    Current
-                  </span>
-                ) : null}
                 {item.description ? (
-                  <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-[var(--ink-soft)]">
+                  <p className="mt-2 max-w-[58ch] text-[0.95rem] leading-relaxed text-[var(--ink-soft)]">
                     {item.description}
                   </p>
                 ) : null}
               </div>
-            </article>
-          </li>
-        ))}
-      </ol>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   );
 }

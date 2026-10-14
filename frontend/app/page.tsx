@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import About from "../components/About";
 import Contact from "../components/Contact";
+import Education from "../components/Education";
 import Experience from "../components/Experience";
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
@@ -10,6 +11,7 @@ import Showcase from "../components/Showcase";
 import Skills from "../components/Skills";
 import { EmptyState, ErrorState, LoadingState } from "../components/States";
 import {
+  getEducation,
   getExperience,
   getGroupedSkills,
   getProfile,
@@ -17,6 +19,7 @@ import {
   getSocialLinks,
 } from "../lib/api";
 import type {
+  Education as EducationItem,
   Experience as ExperienceItem,
   GroupedSkillCategory,
   Profile,
@@ -49,12 +52,14 @@ export default async function HomePage() {
     skillsResult,
     projectsResult,
     experienceResult,
+    educationResult,
   ] = await Promise.all([
     settle<Profile | null>(() => getProfile()),
     settle<SocialLink[]>(() => getSocialLinks()),
     settle<GroupedSkillCategory[]>(() => getGroupedSkills()),
     settle<Project[]>(() => getProjects()),
     settle<ExperienceItem[]>(() => getExperience()),
+    settle<EducationItem[]>(() => getEducation()),
   ]);
 
   const profile = profileResult.data;
@@ -67,6 +72,8 @@ export default async function HomePage() {
   const projectsError = projectsResult.error;
   const experience = experienceResult.data ?? [];
   const experienceError = experienceResult.error;
+  const education = educationResult.data ?? [];
+  const educationError = educationResult.error;
 
   const brand = profile?.name ?? "Portfolio";
   const year = new Date().getFullYear();
@@ -82,15 +89,20 @@ export default async function HomePage() {
       value: String(projects.length),
     },
     yearsOfExperience > 0 && {
-      label: "Years of experience",
+      label: "Years",
       value: String(yearsOfExperience),
     },
-    skillCount > 0 && { label: "Technologies", value: String(skillCount) },
+    skillCount > 0 && { label: "Tech", value: String(skillCount) },
   ].filter((s): s is { label: string; value: string } => Boolean(s));
+
+  const rawStatus = profile?.status ?? "";
+  const status = /^(single|married|divorced|widowed)\b/i.test(rawStatus.trim())
+    ? undefined
+    : rawStatus || undefined;
 
   return (
     <>
-      <Navbar brand={brand} />
+      <Navbar brand={brand} status={status} />
       <main id="main-content">
         <Reveal />
 
@@ -168,19 +180,30 @@ export default async function HomePage() {
             )}
           </Suspense>
 
+          <Suspense fallback={<LoadingState label="Loading education…" />}>
+            {educationError ? (
+              <ErrorState message="Education is currently unavailable." />
+            ) : (
+              <Education
+                items={education}
+                summary={profile?.education_summary}
+              />
+            )}
+          </Suspense>
+
           <Suspense fallback={<LoadingState label="Loading contact…" />}>
             <Contact profile={profile} socials={socials} />
           </Suspense>
         </div>
       </main>
 
-      <footer className="container-x border-t border-[var(--border)] pb-10 pt-8">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted)]">
+      <footer style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="container-x flex flex-wrap items-center justify-between gap-3 py-8 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-[var(--muted)]">
           <p>
             &copy; {year} {brand}
           </p>
-          <p className="font-mono text-xs text-[var(--faint)]">
-            Designed with intent.
+          <p aria-hidden="true">
+            Built with care — sky, glass &amp; real work
           </p>
         </div>
       </footer>

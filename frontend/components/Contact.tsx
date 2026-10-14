@@ -1,10 +1,12 @@
 import type { Profile, SocialLink } from "../lib/types";
+import { SectionIndex } from "./tech";
 
 export interface ContactProps {
   profile: Profile | null;
   socials: SocialLink[];
 }
 
+/** Sunlit pool close: conversational headline, one glass anchor, real links. */
 export default function Contact({ profile, socials }: ContactProps) {
   if (!profile && socials.length === 0) return null;
 
@@ -12,87 +14,67 @@ export default function Contact({ profile, socials }: ContactProps) {
   const name = profile?.name ?? "";
 
   return (
-    <article
+    <section
       id="contact"
       data-reveal
       aria-labelledby="contact-heading"
-      className="contact-close"
+      className="editorial-block"
     >
-      <div className="min-w-0">
-        <p className="eyebrow !text-[color-mix(in_srgb,var(--accent-ink)_70%,transparent)]">
-          Contact
-        </p>
-        <h2
-          id="contact-heading"
-          className="mt-5 max-w-[18ch] break-words text-balance text-[clamp(1.875rem,4vw,3rem)]"
-        >
-          Have a project in mind?{" "}
-          <span className="underline decoration-[color-mix(in_srgb,var(--accent-ink)_50%,transparent)] underline-offset-4">
-            Let us talk.
-          </span>
-        </h2>
-      </div>
+      <SectionIndex num="06" name="Contact" side="Say hello" />
 
-      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-8">
-        {email ? (
-          <a href={`mailto:${email}`} className="btn btn-contrast">
-            {email}
-            <svg
-              aria-hidden="true"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M2 8h11M9 3.5 13.5 8 9 12.5" />
-            </svg>
-          </a>
-        ) : null}
-
-        {socials.length > 0 ? (
-          <ul
-            aria-label="Social links"
-            className="flex list-none flex-wrap gap-x-6 gap-y-2 p-0"
+      <div className="contact-pool mt-8">
+        <div className="relative" style={{ zIndex: 1 }}>
+          <span
+            aria-hidden="true"
+            className="glass float-soft inline-flex items-center gap-2 rounded-full px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-[var(--ink-soft)]"
           >
-            {socials.map((link) => (
-              <li key={link.id}>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${link.platform} profile`}
-                  className="inline-flex min-h-[44px] min-w-[44px] items-center gap-1.5 text-sm font-medium text-[color-mix(in_srgb,var(--accent-ink)_85%,transparent)] no-underline transition-colors hover:text-[var(--accent-ink)]"
-                >
-                  {link.platform}
-                  <svg
-                    aria-hidden="true"
-                    width="13"
-                    height="13"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3.5 10.5l7-7M4.5 3.5h6v6" />
-                  </svg>
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
+            <span className="status-dot" />
+            Replies within a day or two
+          </span>
+          <h2
+            id="contact-heading"
+            className="mt-5 max-w-[20ch] break-words text-balance text-[clamp(2.1rem,5vw,3.6rem)]"
+          >
+            Have something to build?{" "}
+            <span className="hero-gloss-accent">Let&apos;s talk.</span>
+          </h2>
 
-      {name ? (
-        <p className="font-mono text-xs text-[color-mix(in_srgb,var(--accent-ink)_60%,transparent)]">
-          {name}
-        </p>
-      ) : null}
-    </article>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {email ? (
+              <a href={`mailto:${email}`} className="btn btn-accent">
+                {email}
+                <span aria-hidden="true">→</span>
+              </a>
+            ) : null}
+            {socials.length > 0 ? (
+              <ul
+                aria-label="Social links"
+                className="flex list-none flex-wrap gap-2 p-0"
+              >
+                {socials.map((link) => (
+                  <li key={link.id}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${link.platform} profile`}
+                      className="tag !py-2.5 !px-4 !text-[0.8rem] !no-underline hover:!border-[var(--accent)]"
+                    >
+                      {link.platform} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          {name ? (
+            <p className="mt-10 font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+              {name} — thanks for scrolling this far
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </section>
   );
 }

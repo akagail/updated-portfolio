@@ -1,7 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "../components/SmoothScroll";
 import { getProfile } from "../lib/api";
+
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const display = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
+});
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-mono",
+});
 
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
@@ -96,26 +109,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  colorScheme: "light dark",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8f8f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d0d0c" },
-  ],
+  colorScheme: "light",
+  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f5fbff" }],
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${sans.variable} ${display.variable} ${mono.variable}`}
+    >
       <body className="antialiased">
-        {/* Follow the OS theme: .dark tokens apply when the system prefers dark. No-JS defaults to light. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{var m=matchMedia('(prefers-color-scheme: dark)');var f=function(){document.documentElement.classList.toggle('dark',m.matches)};f();m.addEventListener('change',f)}catch(e){}",
-          }}
-        />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>

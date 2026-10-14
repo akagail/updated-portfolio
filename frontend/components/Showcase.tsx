@@ -4,12 +4,13 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 import type { Project } from "../lib/types";
+import { SectionIndex } from "./tech";
 
 export interface ShowcaseProps {
   projects: Project[];
 }
 
-/** Placeholder visuals stay honest: generic interface mock, never fake data. */
+/** Honest placeholder: generic aqua instrument, never fake data. */
 function ProjectMock({ project, index }: { project: Project; index: number }) {
   const rows = [0, 1, 2, 3];
   return (
@@ -63,15 +64,11 @@ function ProjectMock({ project, index }: { project: Project; index: number }) {
 }
 
 /**
- * Scroll-driven horizontal showcase (do-smoothie style).
- *
- * Desktop + motion allowed: the section pins and vertical scroll scrubs a
- * single `x` tween across the track. Travel distance is measured from the
- * real rendered track (`scrollWidth - viewport`), so any project count
- * works and the last panel lands fully in view before release.
- *
- * Mobile / reduced-motion / no-JS: the same markup renders as a calm
- * vertical stack (progressive enhancement — pin only activates from JS).
+ * Pinned horizontal showcase — pin + scrub logic preserved.
+ * Desktop + motion allowed: section pins, vertical scroll scrubs one `x`
+ * tween measured from real track width. Mobile / reduced-motion / no-JS:
+ * same markup falls back to a calm vertical stack.
+ * Visuals only were reworked (sky stage, glass media, focal depth).
  */
 export default function Showcase({ projects }: ShowcaseProps) {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -111,6 +108,16 @@ export default function Showcase({ projects }: ShowcaseProps) {
           ease: "none",
         });
 
+        const panels = Array.from(
+          track.querySelectorAll<HTMLElement>(".showcase-panel"),
+        );
+        const setActive = (active: number) => {
+          panels.forEach((p, i) =>
+            p.setAttribute("data-active", i === active ? "true" : "false"),
+          );
+        };
+        setActive(0);
+
         const st = ScrollTrigger.create({
           trigger: section,
           start: "top top",
@@ -124,19 +131,28 @@ export default function Showcase({ projects }: ShowcaseProps) {
             if (barRef.current) {
               barRef.current.style.transform = `scaleX(${self.progress})`;
             }
+            const active =
+              Math.min(
+                projects.length,
+                Math.floor(self.progress * projects.length) + 1,
+              ) || 1;
             if (countRef.current) {
-              const active =
-                Math.min(
-                  projects.length,
-                  Math.floor(self.progress * projects.length) + 1,
-                ) || 1;
               countRef.current.textContent = String(active).padStart(2, "0");
             }
+            setActive(active - 1);
           },
         });
 
         const onLoad = () => ScrollTrigger.refresh();
         window.addEventListener("load", onLoad);
+        // Recalc once fonts settle — prevents mis-measured travel distance.
+        let fontsDone = false;
+        document.fonts?.ready.then(() => {
+          if (!fontsDone) {
+            fontsDone = true;
+            ScrollTrigger.refresh();
+          }
+        }).catch(() => undefined);
         refreshRef.current = () => ScrollTrigger.refresh();
 
         cleanup = () => {
@@ -146,6 +162,7 @@ export default function Showcase({ projects }: ShowcaseProps) {
           tween.kill();
           gsap.set(track, { clearProps: "x" });
           section.removeAttribute("data-showcase-ready");
+          panels.forEach((p) => p.removeAttribute("data-active"));
           ScrollTrigger.refresh();
         };
       } catch {
@@ -169,123 +186,141 @@ export default function Showcase({ projects }: ShowcaseProps) {
       data-reveal
       className="showcase"
     >
-      <div className="showcase-pin">
-        <div className="container-x showcase-head">
-          <div className="min-w-0">
-            <p className="eyebrow" aria-hidden="true">
-              Selected Work
-            </p>
-            <h2 id="work-heading" className="mt-4 max-w-[16ch] text-balance">
-              Work, one project at a time.
-            </h2>
-            <p className="mt-4 text-[0.9375rem] leading-relaxed text-[var(--muted)]">
-              Keep scrolling — the work moves sideways.
-            </p>
+      <div className="showcase-stage">
+        <div className="showcase-pin">
+          <div className="container-x">
+            <SectionIndex
+              num="03"
+              name="Selected work"
+              side={`${String(projects.length).padStart(2, "0")} projects`}
+            />
           </div>
-          <div className="showcase-progress" aria-hidden="true">
-            <span className="showcase-progress__count">
-              <span ref={countRef}>01</span>
-              {` / ${String(projects.length).padStart(2, "0")}`}
-            </span>
-            <span className="showcase-progress__track">
-              <span ref={barRef} className="showcase-progress__bar" />
-            </span>
+          <div className="container-x showcase-head mt-6">
+            <div className="min-w-0">
+              <h2 id="work-heading" className="max-w-[16ch] text-balance">
+                Things I&apos;ve built &amp; shipped.
+              </h2>
+              <p className="mt-3 max-w-[52ch] text-[0.95rem] text-[var(--muted)]">
+                Keep scrolling — the projects drift sideways. Each one links
+                to the live site and the source.
+              </p>
+            </div>
+            <div className="showcase-progress" aria-hidden="true">
+              <span className="showcase-progress__count">
+                <span ref={countRef}>01</span>
+                {` / ${String(projects.length).padStart(2, "0")}`}
+              </span>
+              <span className="showcase-progress__track">
+                <span ref={barRef} className="showcase-progress__bar" />
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div ref={trackRef} className="showcase-track">
-          {projects.map((project, index) => {
-            const description =
-              project.short_desc || project.detailed_desc || "";
-            const placeholder =
-              !project.short_desc && !project.detailed_desc;
-            return (
-              <article
-                key={project.id}
-                aria-label={`Project ${index + 1}: ${project.title}`}
-                className={`showcase-panel${index % 2 === 1 ? " showcase-panel--flip" : ""}`}
-              >
-                <div className="showcase-panel__inner container-x">
-                  <div className="showcase-panel__copy">
-                    <p className="showcase-meta">
-                      <span>{String(index + 1).padStart(2, "0")}</span>
-                      <span aria-hidden="true"> — </span>
-                      <span>{project.featured ? "Featured" : "Project"}</span>
-                    </p>
-                    <h3 className="showcase-title">{project.title}</h3>
-                    {description ? (
-                      <p className="showcase-desc">
-                        {description}
-                        {placeholder ? (
-                          <span className="placeholder-note">
-                            {" "}
-                            (Placeholder — edit in Django admin.)
-                          </span>
-                        ) : null}
-                      </p>
-                    ) : (
-                      <p className="showcase-desc">
-                        <span className="placeholder-note">
-                          Description coming soon — editable in Django admin.
+          <div ref={trackRef} className="showcase-track">
+            {projects.map((project, index) => {
+              const description =
+                project.short_desc || project.detailed_desc || "";
+              const id = `PRJ-${String(index + 1).padStart(3, "0")}`;
+              return (
+                <article
+                  key={project.id}
+                  aria-label={`Project ${index + 1}: ${project.title}`}
+                  data-active={index === 0 ? "true" : "false"}
+                  className={`showcase-panel${index % 2 === 1 ? " showcase-panel--flip" : ""}`}
+                >
+                  <div className="showcase-panel__inner container-x">
+                    <div className="showcase-panel__copy">
+                      <p className="showcase-meta">
+                        <span style={{ color: "var(--accent)", fontWeight: 700 }}>
+                          {String(index + 1).padStart(2, "0")}
                         </span>
+                        <span aria-hidden="true">{" / "}</span>
+                        <span>
+                          {String(projects.length).padStart(2, "0")}
+                        </span>
+                        {project.featured ? (
+                          <>
+                            <span aria-hidden="true">{" · "}</span>
+                            <span>Featured</span>
+                          </>
+                        ) : null}
                       </p>
-                    )}
-                    {project.techs.length > 0 ? (
-                      <ul
-                        aria-label={`Technologies used in ${project.title}`}
-                        className="mt-5 flex list-none flex-wrap gap-1.5 p-0"
-                      >
-                        {project.techs.map((tech) => (
-                          <li key={tech} className="tag tag--tint">
-                            {tech.trim()}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                    {project.github_url || project.live_url ? (
-                      <div className="showcase-links">
-                        {project.live_url ? (
-                          <a
-                            href={project.live_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-dark"
-                          >
-                            Live demo
-                          </a>
-                        ) : null}
-                        {project.github_url ? (
-                          <a
-                            href={project.github_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="showcase-link"
-                          >
-                            Repository
-                          </a>
-                        ) : null}
+                      <h3 className="showcase-title">{project.title}</h3>
+                      {description ? (
+                        <p className="showcase-desc">{description}</p>
+                      ) : (
+                        <p className="showcase-desc">
+                          <span className="placeholder-note">
+                            Description coming soon — editable in Django admin.
+                          </span>
+                        </p>
+                      )}
+                      {project.techs.length > 0 ? (
+                        <ul
+                          aria-label={`Technologies used in ${project.title}`}
+                          className="mt-5 flex list-none flex-wrap gap-2 p-0"
+                        >
+                          {project.techs.map((tech) => (
+                            <li key={tech} className="tag">
+                              {tech.trim()}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {project.github_url || project.live_url ? (
+                        <div className="showcase-links">
+                          {project.live_url ? (
+                            <a
+                              href={project.live_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-accent"
+                            >
+                              View live
+                              <span aria-hidden="true">↗</span>
+                            </a>
+                          ) : null}
+                          {project.github_url ? (
+                            <a
+                              href={project.github_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="showcase-link"
+                            >
+                              Source <span aria-hidden="true">→</span>
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                    <figure className="min-w-0">
+                      <div className="showcase-media">
+                        {project.image ? (
+                          <Image
+                            src={project.image}
+                            alt={`${project.title} preview`}
+                            fill
+                            sizes="100vw"
+                            loading={index === 0 ? "eager" : "lazy"}
+                            onLoad={() => refreshRef.current?.()}
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ProjectMock project={project} index={index} />
+                        )}
                       </div>
-                    ) : null}
+                      <figcaption className="showcase-figcap" aria-hidden="true">
+                        <span>
+                          {String(index + 1).padStart(2, "0")} — {id}
+                        </span>
+                        <span>{project.image ? "From CMS" : "Preview soon"}</span>
+                      </figcaption>
+                    </figure>
                   </div>
-                  <div className="showcase-media">
-                    {project.image ? (
-                      <Image
-                        src={project.image}
-                        alt={`${project.title} preview`}
-                        fill
-                        sizes="100vw"
-                        loading={index === 0 ? "eager" : "lazy"}
-                        onLoad={() => refreshRef.current?.()}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <ProjectMock project={project} index={index} />
-                    )}
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+                </article>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
