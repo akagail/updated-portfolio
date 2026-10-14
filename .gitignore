@@ -1,0 +1,16 @@
+# Agent / local tooling (session data, caches, skills — machine-specific, never push)
+.agents/
+.bob/
+.claude/
+.opencode/
+agent/
+opencode.json
+skills-lock.json
+
+# Stray local logs
+$log
+frontend/$log
+
+# OS
+.DS_Store
+Thumbs.db

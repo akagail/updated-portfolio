@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="og-title og-desc">
+  <title id="og-title">Portfolio — Projects, Skills, and Experience</title>
+  <desc id="og-desc">Personal portfolio with projects, skills, experience, education, and contact details.</desc>
+  <rect width="1200" height="630" fill="#fafaf7"/>
+  <rect x="0" y="0" width="1200" height="10" fill="#174a3a"/>
+  <rect x="40" y="40" width="1120" height="550" rx="22" fill="#ffffff" stroke="#e4e1d8" stroke-width="2"/>
+  <text x="96" y="152" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="26" font-weight="600" letter-spacing="4" fill="#6b6960">PORTFOLIO</text>
+  <text x="92" y="268" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="84" font-weight="700" letter-spacing="-2" fill="#141412">Projects, skills,</text>
+  <text x="92" y="362" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="84" font-weight="700" letter-spacing="-2" fill="#174a3a">and experience.</text>
+  <text x="96" y="432" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" fill="#3f3e39">Selected work, background, and ways to get in touch.</text>
+  <rect x="96" y="478" width="120" height="8" rx="4" fill="#174a3a"/>
+  <rect x="228" y="478" width="48" height="8" rx="4" fill="#e4e1d8"/>
+  <rect x="288" y="478" width="48" height="8" rx="4" fill="#e4e1d8"/>
+</svg>
