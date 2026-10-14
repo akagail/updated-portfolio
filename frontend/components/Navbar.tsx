@@ -73,10 +73,13 @@ export default function Navbar({
       if (ticking) return;
       ticking = true;
       window.requestAnimationFrame(() => {
-        const probe = window.scrollY + window.innerHeight * 0.4;
+        const y = window.scrollY;
+        const probe = y + window.innerHeight * 0.4;
         let current = "";
         for (const section of sections) {
-          if (section.offsetTop <= probe) current = `#${section.id}`;
+          // rect-based: GSAP's pin-spacer is position:relative, which collapses
+          // #work's offsetTop — rects stay in document space regardless.
+          if (section.getBoundingClientRect().top + y <= probe) current = `#${section.id}`;
         }
         setActive(current);
         ticking = false;

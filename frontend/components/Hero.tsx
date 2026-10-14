@@ -3,6 +3,7 @@
 import { useRef } from "react";
 
 import type { Profile, SocialLink } from "../lib/types";
+import CloudScene from "./CloudScene";
 
 interface HeroProps {
   profile: Profile | null;
@@ -57,6 +58,8 @@ export default function Hero({ profile, socials }: HeroProps) {
         paddingBottom: "clamp(4rem, 9vh, 6.5rem)",
       }}
     >
+      {/* Photographic sky scene behind everything else */}
+      <CloudScene variant="hero" />
       {/* Sunlight follows pointer — CSS vars, decorative only */}
       <div
         aria-hidden="true"

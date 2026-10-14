@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 import type { Project } from "../lib/types";
+import CloudScene from "./CloudScene";
+import GrassFringe from "./GrassFringe";
 import { SectionIndex } from "./tech";
 
 export interface ShowcaseProps {
@@ -59,6 +61,35 @@ function ProjectMock({ project, index }: { project: Project; index: number }) {
         </div>
       </div>
       <span className="mock-num">{String(index + 1).padStart(2, "0")}</span>
+    </div>
+  );
+}
+
+/**
+ * Falling glass bubbles — deterministic pseudo-random spread (index-derived,
+ * so SSR and client render match), CSS-animated, hidden on reduced motion.
+ */
+function BubbleRain({ count = 14 }: { count?: number }) {
+  return (
+    <div aria-hidden="true" className="showcase-rain">
+      {Array.from({ length: count }, (_, i) => {
+        const size = 10 + ((i * 23) % 34);
+        return (
+          <span
+            key={i}
+            className={`rain-bubble ${size < 24 ? "" : size < 34 ? "lens-m" : "lens-l"}`}
+            style={{
+              left: `${(i * 37 + 7) % 100}%`,
+              width: size,
+              height: size,
+              opacity: 0.35 + ((i * 17) % 40) / 100,
+              ["--fall" as string]: `${11 + ((i * 13) % 9)}s`,
+              ["--delay" as string]: `${-((i * 7) % 18)}s`,
+              ["--drift" as string]: `${((i * 29) % 60) - 30}px`,
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -187,6 +218,9 @@ export default function Showcase({ projects }: ShowcaseProps) {
       className="showcase"
     >
       <div className="showcase-stage">
+        <CloudScene variant="stage" />
+        <BubbleRain />
+        <GrassFringe />
         <div className="showcase-pin">
           <div className="container-x">
             <SectionIndex

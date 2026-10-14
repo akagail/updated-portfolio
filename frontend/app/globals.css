@@ -61,11 +61,6 @@
   color-scheme: light;
 }
 
-@keyframes drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(2rem, -1.5rem, 0) scale(1.06); }
-}
-
 @keyframes float-soft {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
@@ -74,6 +69,42 @@
 @keyframes ripple {
   0% { transform: scale(0.9); opacity: 0.5; }
   100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes cloud-drift {
+  from { transform: translate3d(-4%, 0, 0); }
+  to { transform: translate3d(4%, 0, 0); }
+}
+
+@keyframes cloud-travel {
+  0% { transform: translate3d(-45vw, 0, 0); opacity: 0; }
+  7% { opacity: var(--op, 1); }
+  93% { opacity: var(--op, 1); }
+  100% { transform: translate3d(115vw, 0, 0); opacity: 0; }
+}
+
+@keyframes cloud-bob {
+  from { transform: translateY(-8px) scaleX(var(--flip, 1)); }
+  to { transform: translateY(10px) scaleX(var(--flip, 1)); }
+}
+
+@keyframes cloud-appear {
+  from { opacity: 0; }
+}
+
+@keyframes grass-sway {
+  from { transform: translate3d(-10px, 0, 0); }
+  to { transform: translate3d(10px, 0, 0); }
+}
+
+@keyframes tuft-sway {
+  from { transform: rotate(-2.2deg) scaleX(var(--flip, 1)); }
+  to { transform: rotate(2.2deg) scaleX(var(--flip, 1)); }
+}
+
+@keyframes bubble-fall {
+  from { transform: translate3d(0, -8vh, 0); }
+  to { transform: translate3d(var(--drift, 2rem), 118vh, 0); }
 }
 
 @layer base {
@@ -99,21 +130,9 @@
       radial-gradient(46rem 32rem at 8% 4%, rgba(143, 216, 255, 0.5), transparent 65%),
       radial-gradient(60rem 38rem at 50% 110%, rgba(140, 240, 224, 0.4), transparent 65%),
       linear-gradient(180deg, #eef8ff 0%, #f5fbff 34%, #eaf6ff 68%, #e2f3f0 100%);
-    background-attachment: fixed;
-  }
-
-  /* Slow drifting cloud light — decorative, disabled on reduced motion / mobile */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: -20vmax;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-      radial-gradient(22rem 12rem at 22% 30%, rgba(255, 255, 255, 0.9), transparent 70%),
-      radial-gradient(26rem 14rem at 74% 24%, rgba(255, 255, 255, 0.75), transparent 70%),
-      radial-gradient(30rem 16rem at 55% 72%, rgba(199, 245, 217, 0.35), transparent 70%);
-    animation: drift 26s ease-in-out infinite;
+    /* Scroll (not fixed): fixed attachments repaint the full viewport on
+       every scroll frame; scrolling composes instead. Matches mobile. */
+    background-attachment: scroll;
   }
 
   img, video { max-width: 100%; height: auto; }
@@ -153,7 +172,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    body, body::before { animation: none; background-attachment: scroll; }
+    body { animation: none; background-attachment: scroll; }
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
@@ -161,7 +180,6 @@
     }
   }
   @media (max-width: 767px) {
-    body::before { display: none; }
     body { background-attachment: scroll; }
   }
 }
@@ -400,6 +418,40 @@
     border: 1px solid rgba(255, 255, 255, 0.6);
     box-shadow: inset -6px -8px 18px rgba(143, 216, 255, 0.35), 0 12px 32px rgba(18, 58, 82, 0.1);
   }
+  /* Layered photographic sky: gradient + drifting cloud sprites, always behind content */
+  .cloud-scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .cloud-scene__sky { position: absolute; inset: 0; }
+  /* One-time fade so client-generated clouds roll in instead of popping */
+  .cloud-appear { animation: cloud-appear 1.6s ease-out; }
+  .cloud-scene__cloud {
+    position: absolute;
+    height: auto;
+    max-width: none;
+    animation: cloud-drift var(--drift, 130s) ease-in-out infinite alternate;
+    will-change: transform;
+  }
+  /* Travelling weather: one-way trip across the sky, fading at the edges */
+  .cloud-drifter {
+    position: absolute;
+    left: 0;
+    animation: cloud-travel var(--trav, 200s) linear infinite;
+    animation-delay: var(--trav-delay, 0s);
+    will-change: transform;
+  }
+  .cloud-bob {
+    height: auto;
+    max-width: none;
+    animation: cloud-bob var(--bob, 11s) ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cloud-scene__cloud, .cloud-bob { animation: none; }
+    .cloud-drifter { display: none; }
+  }
   .hero-gloss {
     background: linear-gradient(180deg, #123a52 0%, #1d5a7a 55%, #2a7d8f 100%);
     -webkit-background-clip: text;
@@ -420,12 +472,93 @@
   .showcase { position: relative; overflow-x: clip; scroll-margin-top: 0; }
   .showcase-stage {
     position: relative;
+    overflow: clip;
     border-block: 1px solid var(--border);
-    background:
-      radial-gradient(40rem 22rem at 50% 0%, rgba(255, 255, 255, 0.85), transparent 65%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(234, 246, 255, 0.25));
+    background: linear-gradient(180deg, #e8f3fc, #f2f9fe);
   }
-  .showcase-pin { padding-block: clamp(3rem, 8vh, 5rem); }
+  /* Site-wide falling rain — fixed overlay above content, below nav. */
+  .site-rain {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .site-rain .rain-bubble { top: -80px; }
+  @media (prefers-reduced-motion: reduce) { .site-rain { display: none; } }
+  /* Foreground grass fringe — Projects stage only, behind the cards */
+  .grass-fringe {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .grass-strip {
+    position: absolute;
+    bottom: 0;
+    left: -2%;
+    width: 104%;
+    height: auto;
+    max-width: none;
+    animation: grass-sway var(--sway, 11s) ease-in-out infinite alternate;
+  }
+  .grass-back { bottom: 6px; --sway: 13s; opacity: 0.95; }
+  .grass-front { bottom: -10px; --sway: 9s; }
+  .tuft {
+    position: absolute;
+    bottom: -8px;
+    height: auto;
+    transform-origin: 50% 100%;
+    animation: tuft-sway var(--sway, 6s) ease-in-out infinite alternate;
+    animation-delay: var(--sway-delay, 0s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grass-strip, .tuft { animation: none; }
+  }
+  @media (max-width: 767px) {
+    .grass-strip { left: -35%; width: 170%; }
+  }
+  /* Falling glass bubbles — decorative rain behind the cards */
+  .showcase-rain {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .rain-bubble {
+    position: absolute;
+    top: -70px;
+    border-radius: 999px;
+    /* Genuine localized refraction where supported (Chromium/Edge);
+       ignored elsewhere — the glass look below is the universal fallback. */
+    -webkit-backdrop-filter: url(#bubble-lens-m);
+    backdrop-filter: url(#bubble-lens-m);
+    background:
+      conic-gradient(from 210deg at 35% 30%, rgba(255, 255, 255, 0.08), rgba(140, 240, 255, 0.06) 25%, rgba(255, 255, 255, 0) 45%, rgba(255, 0, 160, 0.04) 60%, rgba(140, 240, 255, 0.06) 75%, rgba(255, 255, 255, 0.08)),
+      radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.15) 65%, rgba(140, 220, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset -6px -8px 18px rgba(143, 216, 255, 0.35), 0 12px 32px rgba(18, 58, 82, 0.1);
+    animation: bubble-fall var(--fall, 14s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .rain-bubble.lens-s {
+    -webkit-backdrop-filter: url(#bubble-lens-s);
+    backdrop-filter: url(#bubble-lens-s);
+  }
+  .rain-bubble.lens-l {
+    -webkit-backdrop-filter: url(#bubble-lens-l);
+    backdrop-filter: url(#bubble-lens-l);
+  }
+  /* Scroll guard: plain glass while scrolling, refraction returns at rest. */
+  html[data-scrolling="true"] .rain-bubble {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  @media (prefers-reduced-motion: reduce) { .showcase-rain { display: none; } }
+  .showcase-pin { position: relative; z-index: 1; padding-block: clamp(3rem, 8vh, 5rem); }
   .showcase-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }
   .showcase-progress { display: none; flex-shrink: 0; align-items: center; gap: 1rem; padding-bottom: 0.4rem; }
   .showcase[data-showcase-ready] .showcase-progress { display: flex; }
@@ -530,6 +663,8 @@
     gap: clamp(2rem, 5vw, 4.5rem);
     width: max-content;
     margin-top: clamp(1.5rem, 4vh, 2.5rem);
+    /* Center first/last panels: side padding = leftover viewport around one panel. */
+    padding-inline: max(var(--gutter), calc((100vw - min(88vw, 68rem)) / 2));
     will-change: transform;
     perspective: 1400px;
   }
