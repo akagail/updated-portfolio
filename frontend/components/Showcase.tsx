@@ -86,6 +86,7 @@ function BubbleRain({ count = 14 }: { count?: number }) {
               ["--fall" as string]: `${11 + ((i * 13) % 9)}s`,
               ["--delay" as string]: `${-((i * 7) % 18)}s`,
               ["--drift" as string]: `${((i * 29) % 60) - 30}px`,
+              ["--hx" as string]: `${28 + ((i * 13) % 12)}%`,
             }}
           />
         );
@@ -254,6 +255,12 @@ export default function Showcase({ projects }: ShowcaseProps) {
             {projects.map((project, index) => {
               const description =
                 project.short_desc || project.detailed_desc || "";
+              const extra =
+                project.short_desc &&
+                project.detailed_desc &&
+                project.detailed_desc !== project.short_desc
+                  ? project.detailed_desc
+                  : "";
               const id = `PRJ-${String(index + 1).padStart(3, "0")}`;
               return (
                 <article
@@ -289,6 +296,11 @@ export default function Showcase({ projects }: ShowcaseProps) {
                           </span>
                         </p>
                       )}
+                      {extra ? (
+                        <p className="showcase-desc mt-3 text-[0.92rem] text-[var(--muted)]">
+                          {extra}
+                        </p>
+                      ) : null}
                       {project.techs.length > 0 ? (
                         <ul
                           aria-label={`Technologies used in ${project.title}`}

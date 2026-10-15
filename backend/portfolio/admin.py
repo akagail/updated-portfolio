@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import (
+    DeviceScreen,
     Education,
     Experience,
     Profile,
@@ -10,6 +11,22 @@ from .models import (
     SkillCategory,
     SocialLink,
 )
+
+
+@admin.register(DeviceScreen)
+class DeviceScreenAdmin(admin.ModelAdmin):
+    list_display = ("title", "is_active", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("title",)
+    ordering = ("-updated_at",)
+    readonly_fields = ("screen_preview",)
+
+    def screen_preview(self, obj):
+        if obj.screen_image:
+            return format_html('<img src="{}" style="max-height:200px;" />', obj.screen_image.url)
+        return "—"
+
+    screen_preview.short_description = "Screen preview"
 
 
 @admin.register(Profile)

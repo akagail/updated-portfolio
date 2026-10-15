@@ -1,4 +1,30 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
+
+
+class DeviceScreen(models.Model):
+    """Single active screen image shown on the hero flip phone display."""
+
+    title = models.CharField(max_length=200)
+    screen_image = models.ImageField(
+        upload_to='device/',
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'webp'])],
+    )
+    is_active = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.is_active:
+            DeviceScreen.objects.exclude(pk=self.pk).filter(is_active=True).update(is_active=False)
 
 
 class Profile(models.Model):

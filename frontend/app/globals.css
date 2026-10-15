@@ -113,7 +113,11 @@
     scroll-padding-top: 6rem;
     -webkit-text-size-adjust: 100%;
     overflow-x: clip;
+    /* Custom liquid scrollbar replaces the native one; scrolling untouched. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
 
   body {
     background-color: var(--bg);
@@ -414,9 +418,13 @@
     position: absolute;
     border-radius: 999px;
     pointer-events: none;
-    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.15) 65%);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: inset -6px -8px 18px rgba(143, 216, 255, 0.35), 0 12px 32px rgba(18, 58, 82, 0.1);
+    /* Water droplet: clear center, sun hotspot, cyan rim-light, shaded base. */
+    background:
+      radial-gradient(circle at var(--hx, 32%) 26%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.3) 10%, transparent 24%),
+      radial-gradient(circle at 68% 74%, rgba(200, 242, 255, 0.45) 0%, transparent 28%),
+      radial-gradient(circle at 50% 50%, transparent 60%, rgba(120, 205, 240, 0.14) 78%, rgba(255, 255, 255, 0.4) 91%, rgba(255, 255, 255, 0.08) 98%),
+      radial-gradient(circle at 50% 112%, rgba(15, 90, 125, 0.24), transparent 55%);
+    box-shadow: inset 2px 4px 12px rgba(255, 255, 255, 0.55), inset 0 -10px 20px rgba(20, 110, 150, 0.16), 0 12px 32px rgba(18, 58, 82, 0.1);
   }
   /* Layered photographic sky: gradient + drifting cloud sprites, always behind content */
   .cloud-scene {
@@ -426,6 +434,16 @@
     pointer-events: none;
   }
   .cloud-scene__sky { position: absolute; inset: 0; }
+  .cloud-scene__sky::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(36rem 24rem at 82% 6%, rgba(255, 248, 214, 0.75), rgba(255, 248, 214, 0) 62%),
+      radial-gradient(48rem 30rem at 50% 108%, rgba(140, 240, 224, 0.5), transparent 65%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 30%, transparent 70%, rgba(120, 210, 240, 0.25) 100%);
+  }
   /* One-time fade so client-generated clouds roll in instead of popping */
   .cloud-appear { animation: cloud-appear 1.6s ease-out; }
   .cloud-scene__cloud {
@@ -464,6 +482,107 @@
     background-clip: text;
     color: transparent;
   }
+  .hero-titlegrid { display: grid; gap: 1rem 2rem; align-items: start; position: relative; }
+  .hero-main { position: relative; }
+  @media (min-width: 1024px) {
+    /* Figure floats beside the whole text stack: out of flow, centered on it. */
+    .hero-main .flip-figure {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      translate: 0 -50%;
+      width: min(40%, 460px);
+      margin: 0;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-titlegrid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+  }
+
+    /* Flip phone — WebGL handset inside a DOM-positioned viewport. */
+  .flip-figure { margin: 0; min-width: 0; }
+  .gl-wrap {
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    border-radius: var(--radius-lg);
+  }
+  .gl-wrap[data-grabbing="true"] { cursor: grabbing; }
+  .gl-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+  .gl-view {
+    position: relative;
+    height: 340px;
+  }
+  @media (min-width: 1100px) { .gl-view { height: 420px; } }
+  .gl-view canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    touch-action: pan-y;
+    outline: none;
+  }
+  .gl-shadow {
+    position: absolute;
+    bottom: 8px;
+    left: 12%;
+    right: 12%;
+    height: 30px;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.55) 0%, transparent 45%),
+      radial-gradient(ellipse at center, rgba(10, 70, 110, 0.38), rgba(60, 170, 210, 0.18) 55%, transparent 72%);
+    filter: blur(7px);
+  }
+  .gl-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .gl-loading::before {
+    content: "";
+    width: 150px;
+    aspect-ratio: 1 / 2.1;
+    border-radius: 24px;
+    background: linear-gradient(160deg, #d8f1ff, #93d3ee 50%, #c9f2ea);
+    opacity: 0.5;
+    animation: float-soft 2.4s ease-in-out infinite;
+  }
+  .gl-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+  .gl-fallback__screen {
+    width: 150px;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    background: linear-gradient(165deg, #0a2531, #0e3a4d 55%, #082230);
+    box-shadow: 0 24px 64px rgba(18, 58, 82, 0.2), 0 0 0 6px #cfe3ef, 0 0 0 7px #7ba7c2;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #9fd8e8;
+  }
+  .gl-fallback__screen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .flip-caption {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
 
   .float-soft { animation: float-soft 7s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) { .float-soft { animation: none; } }
@@ -533,14 +652,16 @@
     top: -70px;
     border-radius: 999px;
     /* Genuine localized refraction where supported (Chromium/Edge);
-       ignored elsewhere — the glass look below is the universal fallback. */
+       ignored elsewhere — the droplet look below is the universal fallback. */
     -webkit-backdrop-filter: url(#bubble-lens-m);
     backdrop-filter: url(#bubble-lens-m);
+    /* Water droplet: clear center, sun hotspot, cyan rim-light, shaded base. */
     background:
-      conic-gradient(from 210deg at 35% 30%, rgba(255, 255, 255, 0.08), rgba(140, 240, 255, 0.06) 25%, rgba(255, 255, 255, 0) 45%, rgba(255, 0, 160, 0.04) 60%, rgba(140, 240, 255, 0.06) 75%, rgba(255, 255, 255, 0.08)),
-      radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.15) 65%, rgba(140, 220, 255, 0.05));
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: inset -6px -8px 18px rgba(143, 216, 255, 0.35), 0 12px 32px rgba(18, 58, 82, 0.1);
+      radial-gradient(circle at var(--hx, 32%) 24%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.35) 8%, transparent 20%),
+      radial-gradient(circle at 70% 76%, rgba(200, 242, 255, 0.5) 0%, transparent 26%),
+      radial-gradient(circle at 50% 50%, transparent 58%, rgba(120, 205, 240, 0.16) 76%, rgba(255, 255, 255, 0.42) 90%, rgba(255, 255, 255, 0.1) 98%),
+      radial-gradient(circle at 50% 112%, rgba(15, 90, 125, 0.28), transparent 55%);
+    box-shadow: inset 2px 3px 8px rgba(255, 255, 255, 0.5), inset 0 -6px 12px rgba(20, 110, 150, 0.18);
     animation: bubble-fall var(--fall, 14s) linear infinite;
     animation-delay: var(--delay, 0s);
   }
@@ -557,6 +678,69 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  /* Liquid water scrollbar — fixed left-edge droplet stream, decorative. */
+  .aqua-root {
+    position: fixed;
+    left: max(10px, env(safe-area-inset-left));
+    top: 50%;
+    translate: 0 -50%;
+    z-index: 45;
+    pointer-events: none;
+  }
+  .aqua-track {
+    position: relative;
+    width: 26px;
+    height: min(46vh, 380px);
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+  }
+  /* Stream column + fused end droplets in one layer: same material, no gaps. */
+  .aqua-track::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 50% 7px, rgba(255, 255, 255, 0.7) 0 3px, transparent 6px),
+      radial-gradient(circle at 50% calc(100% - 7px), rgba(255, 255, 255, 0.55) 0 3px, transparent 6px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(140, 220, 250, 0.16) 30%, rgba(140, 220, 250, 0.16) 70%, rgba(255, 255, 255, 0.45));
+    /* stylelint-disable-next-line property-no-unknown */
+    background-size: 14px 14px, 14px 14px, 8px calc(100% - 16px);
+    background-position: center top, center bottom, center center;
+    background-repeat: no-repeat;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.55), inset -1px -1px 2px rgba(20, 110, 150, 0.16);
+    opacity: 0.75;
+  }
+  .aqua-thumb {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50% 0;
+    width: 22px;
+    height: 30px;
+    cursor: grab;
+    touch-action: none;
+    will-change: transform;
+  }
+  .aqua-thumb[data-dragging="true"] { cursor: grabbing; }
+  .aqua-drop {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background:
+      radial-gradient(circle at 36% 24%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.3) 22%, transparent 46%),
+      radial-gradient(circle at 68% 74%, rgba(200, 242, 255, 0.5) 0%, transparent 34%),
+      radial-gradient(circle at 50% 50%, transparent 58%, rgba(120, 205, 240, 0.2) 78%, rgba(255, 255, 255, 0.5) 92%, rgba(255, 255, 255, 0.12) 99%),
+      linear-gradient(180deg, rgba(190, 235, 252, 0.35), rgba(120, 200, 235, 0.28));
+    box-shadow: inset 1px 2px 4px rgba(255, 255, 255, 0.6), inset 0 -4px 8px rgba(20, 110, 150, 0.22);
+    transition: transform 180ms ease, opacity 180ms ease;
+  }
+  .aqua-root:hover .aqua-drop { opacity: 1; }
+  .aqua-root:hover .aqua-track::before { opacity: 0.9; }
+  @media (max-width: 767px) { .aqua-root { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .aqua-drop { transition: none; } }
   @media (prefers-reduced-motion: reduce) { .showcase-rain { display: none; } }
   .showcase-pin { position: relative; z-index: 1; padding-block: clamp(3rem, 8vh, 5rem); }
   .showcase-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; }

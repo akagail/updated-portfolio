@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SiteRain from "../components/SiteRain";
+import AquaScrollbar from "../components/AquaScrollbar";
 import ScrollCalm from "../components/ScrollCalm";
 import SmoothScroll from "../components/SmoothScroll";
 import { getProfile } from "../lib/api";
@@ -130,6 +131,7 @@ export default function RootLayout({
         </a>
         {children}
         <SiteRain />
+        <AquaScrollbar />
         <ScrollCalm />
         <SmoothScroll />
       </body>

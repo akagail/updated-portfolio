@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import (
+    DeviceScreen,
     Education,
     Experience,
     Profile,
@@ -72,6 +73,12 @@ class ProjectSerializer(serializers.ModelSerializer):
             'featured',
             'order',
         ]
+
+
+class DeviceScreenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceScreen
+        fields = ['id', 'title', 'screen_image', 'is_active', 'updated_at']
 
 
 class ExperienceSerializer(serializers.ModelSerializer):

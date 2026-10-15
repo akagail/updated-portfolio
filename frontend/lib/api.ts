@@ -1,4 +1,5 @@
 import type {
+  DeviceScreen,
   Education,
   Experience,
   GroupedSkillCategory,
@@ -71,4 +72,13 @@ export function getExperience(): Promise<Experience[]> {
 
 export function getEducation(): Promise<Education[]> {
   return fetchJson<Education[]>("/api/education/");
+}
+
+export async function getDeviceScreen(): Promise<DeviceScreen | null> {
+  try {
+    return await fetchJson<DeviceScreen>("/api/device-screen/active/");
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  }
 }

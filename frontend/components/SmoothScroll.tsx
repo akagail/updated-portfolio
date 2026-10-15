@@ -35,6 +35,8 @@ export default function SmoothScroll() {
       gsap.registerPlugin(ScrollTrigger);
 
       const lenis = new Lenis({ anchors: true, lerp: 0.1, syncTouch: false });
+      // Exposed for the decorative liquid scrollbar's drag-to-scroll only.
+      (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
 
       // Lenis raf driven by the gsap ticker; ScrollTrigger follows Lenis.
       const raf = (time: number) => {
@@ -51,6 +53,7 @@ export default function SmoothScroll() {
       dispose = () => {
         gsap.ticker.remove(raf);
         gsap.ticker.lagSmoothing(500, 33);
+        delete (window as unknown as { __lenis?: Lenis }).__lenis;
         lenis.destroy();
       };
     })();

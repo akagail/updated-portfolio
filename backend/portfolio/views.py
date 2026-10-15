@@ -3,8 +3,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Education, Experience, Profile, Project, Skill, SkillCategory, SocialLink
+from .models import DeviceScreen, Education, Experience, Profile, Project, Skill, SkillCategory, SocialLink
 from .serializers import (
+    DeviceScreenSerializer,
     EducationSerializer,
     ExperienceSerializer,
     GroupedSkillCategorySerializer,
@@ -71,6 +72,20 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
             elif featured.lower() in ('false', '0', 'no'):
                 queryset = queryset.filter(featured=False)
         return queryset
+
+
+class DeviceScreenViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = DeviceScreen.objects.order_by('-updated_at')
+    serializer_class = DeviceScreenSerializer
+    pagination_class = None
+
+    @action(detail=False, methods=['get'])
+    def active(self, request):
+        instance = DeviceScreen.objects.filter(is_active=True, screen_image__isnull=False).order_by('-updated_at').first()
+        if instance is None or not instance.screen_image:
+            return Response(None, status=404)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class ExperienceViewSet(viewsets.ReadOnlyModelViewSet):

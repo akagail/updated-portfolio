@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    DeviceScreenViewSet,
     EducationViewSet,
     ExperienceViewSet,
     ProfileViewSet,
@@ -10,6 +11,7 @@ from .views import (
 )
 
 router = DefaultRouter()
+router.register(r'device-screen', DeviceScreenViewSet, basename='device-screen')
 router.register(r'profile', ProfileViewSet, basename='profile')
 router.register(r'social-links', SocialLinkViewSet, basename='social-link')
 router.register(r'skills', SkillViewSet, basename='skill')

@@ -42,7 +42,7 @@ export default function Skills({ categories, projects = [] }: SkillsProps) {
           </h2>
           <p className="mt-4 max-w-[36ch] text-[0.95rem] leading-relaxed text-[var(--muted)]">
             Only things already on this page — in the CMS or in shipped
-            project code. No scores, no meters.
+            project code, with CMS-set levels.
           </p>
         </div>
 
@@ -62,6 +62,11 @@ export default function Skills({ categories, projects = [] }: SkillsProps) {
                 {category.skills.map((skill) => (
                   <li key={skill.id} className="skill-bubble">
                     {skill.name}
+                    {skill.level ? (
+                      <span className="ml-2 font-mono text-[0.7rem] font-normal text-[var(--muted)]">
+                        {skill.level}
+                      </span>
+                    ) : null}
                   </li>
                 ))}
               </ul>

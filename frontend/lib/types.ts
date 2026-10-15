@@ -74,3 +74,11 @@ export interface Education {
   end_year: number | null;
   order: number;
 }
+
+export interface DeviceScreen {
+  id: number;
+  title: string;
+  screen_image: string | null;
+  is_active: boolean;
+  updated_at: string;
+}

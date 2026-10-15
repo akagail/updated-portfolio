@@ -11,6 +11,7 @@ import Showcase from "../components/Showcase";
 import Skills from "../components/Skills";
 import { EmptyState, ErrorState, LoadingState } from "../components/States";
 import {
+  getDeviceScreen,
   getEducation,
   getExperience,
   getGroupedSkills,
@@ -19,6 +20,7 @@ import {
   getSocialLinks,
 } from "../lib/api";
 import type {
+  DeviceScreen,
   Education as EducationItem,
   Experience as ExperienceItem,
   GroupedSkillCategory,
@@ -53,6 +55,7 @@ export default async function HomePage() {
     projectsResult,
     experienceResult,
     educationResult,
+    deviceResult,
   ] = await Promise.all([
     settle<Profile | null>(() => getProfile()),
     settle<SocialLink[]>(() => getSocialLinks()),
@@ -60,6 +63,7 @@ export default async function HomePage() {
     settle<Project[]>(() => getProjects()),
     settle<ExperienceItem[]>(() => getExperience()),
     settle<EducationItem[]>(() => getEducation()),
+    settle<DeviceScreen | null>(() => getDeviceScreen()),
   ]);
 
   const profile = profileResult.data;
@@ -79,9 +83,9 @@ export default async function HomePage() {
   const year = new Date().getFullYear();
 
   const earliestStart = experience.map((e) => e.start_date).sort()[0];
-  const yearsOfExperience = earliestStart
-    ? Math.max(1, year - new Date(earliestStart).getFullYear())
-    : 0;
+  void earliestStart;
+  // Coding since the last year of high school (2019) — stated by the owner.
+  const yearsOfExperience = Math.max(1, year - 2019);
   const skillCount = skills.flatMap((c) => c.skills).length;
   const aboutStats = [
     projects.length > 0 && {
@@ -107,7 +111,7 @@ export default async function HomePage() {
         <Reveal />
 
         <Suspense fallback={<LoadingState label="Loading introduction…" />}>
-          <Hero profile={profile} socials={socials} />
+          <Hero profile={profile} socials={socials} device={deviceResult.data} />
         </Suspense>
 
         {socialsError ? (
@@ -203,7 +207,7 @@ export default async function HomePage() {
             &copy; {year} {brand}
           </p>
           <p aria-hidden="true">
-            Built with care — sky, glass &amp; real work
+            Neo-Frutiger Aero inspired
           </p>
         </div>
       </footer>

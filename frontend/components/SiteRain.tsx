@@ -74,6 +74,7 @@ export default function SiteRain({ count = 18 }: { count?: number }) {
               ["--fall" as string]: `${9 + ((i * 11) % 8)}s`,
               ["--delay" as string]: `${-((i * 5) % 16)}s`,
               ["--drift" as string]: `${((i * 31) % 70) - 35}px`,
+              ["--hx" as string]: `${28 + ((i * 13) % 12)}%`,
             }}
           />
         );
