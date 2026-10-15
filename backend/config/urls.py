@@ -24,5 +24,5 @@ urlpatterns = [
     path('api/', include('portfolio.urls')),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# shortcut: serve user uploads from Django; move to S3/R2 when traffic grows.
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
