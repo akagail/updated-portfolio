@@ -6,6 +6,8 @@ services:
     startCommand: cd backend && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
     plan: free
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
       - key: DJANGO_DEBUG
         value: False
       - key: DJANGO_SECRET_KEY
