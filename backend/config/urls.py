@@ -24,5 +24,6 @@ urlpatterns = [
     path('api/', include('portfolio.urls')),
 ]
 
-# shortcut: serve user uploads from Django; move to S3/R2 when traffic grows.
+# Dev only: `static()` is a no-op when DEBUG is False. Production media lives on
+# Supabase Storage, so Django never serves uploads there.
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

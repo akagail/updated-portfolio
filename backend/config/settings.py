@@ -156,10 +156,48 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Uploads go to Supabase Storage when configured. Render's free disk is wiped on
+# every restart/deploy, which is why uploaded media used to disappear.
+S3_ENABLED = bool(
+    os.getenv('SUPABASE_S3_ENDPOINT')
+    and os.getenv('SUPABASE_S3_ACCESS_KEY')
+    and os.getenv('SUPABASE_S3_SECRET_KEY')
+)
+
+if S3_ENABLED:
+    _s3_endpoint = os.getenv('SUPABASE_S3_ENDPOINT', '')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_STORAGE_BUCKET', 'media')
+    AWS_S3_ENDPOINT_URL = _s3_endpoint
+    AWS_S3_REGION_NAME = os.getenv('SUPABASE_S3_REGION', 'us-east-1')
+    AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_S3_ACCESS_KEY')
+    AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_S3_SECRET_KEY')
+    AWS_S3_ADDRESSING_STYLE = 'path'  # Supabase S3 uses path-style addressing
+    # Public URL base for file.url; Supabase's is derivable from the endpoint.
+    AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN', '')
+    if not AWS_S3_CUSTOM_DOMAIN:
+        _s3_host = urlparse(_s3_endpoint).netloc
+        if _s3_host.endswith('.supabase.co'):
+            _s3_host = _s3_host.replace('.storage.supabase.co', '.supabase.co')
+            AWS_S3_CUSTOM_DOMAIN = (
+                f'{_s3_host}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
+            )
+
+STORAGES = {
+    'default': {
+        'BACKEND': (
+            'config.storage.MediaStorage'
+            if S3_ENABLED
+            else 'django.core.files.storage.FileSystemStorage'
+        ),
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 CORS_ALLOWED_ORIGINS = [
     o.strip() for o in os.getenv('DJANGO_CORS_ORIGINS', 'http://localhost:3000').split(',') if o.strip()

@@ -6,3 +6,4 @@ Pillow
 python-dotenv
 gunicorn
 whitenoise
+django-storages[s3]
